@@ -4,7 +4,6 @@ import joblib
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from io import BytesIO
 
 # =====================================================
@@ -14,13 +13,19 @@ from io import BytesIO
 st.set_page_config(
     page_title="Student Analytics Pro",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "dataset.csv")
 MODEL_PATH = os.path.join(BASE_DIR, "student_model.pkl")
 BACKUP_PATH = os.path.join(BASE_DIR, "dataset_backup.csv")
+
+HOME_BANNER_URL = (
+    "https://images.pexels.com/photos/16420457/pexels-photo-16420457/"
+    "free-photo-of-a-group-of-students-sitting-in-a-library-and-studying.jpeg"
+    "?auto=compress&dpr=1&h=750&w=1260"
+)
 
 PAGES = [
     "Home",
@@ -36,14 +41,13 @@ PAGES = [
 ]
 
 # =====================================================
-# 2. SIMPLE PROFESSIONAL CSS
+# 2. PROFESSIONAL CSS
 # =====================================================
 
 st.markdown("""
 <style>
-
 .stApp {
-    background-color: #F7F8FA;
+    background-color: #E8EAED;
     color: #303846;
     font-family: Arial, sans-serif !important;
 }
@@ -58,20 +62,25 @@ html, body, [class*="css"] {
     padding-bottom: 2rem;
 }
 
-/* Headings */
 h1, h2, h3, h4 {
     color: #203B5C !important;
     font-family: Arial, sans-serif !important;
     font-weight: 600 !important;
 }
 
-/* General text */
-p, label, li {
+p, label, li, [data-testid="stMarkdownContainer"] {
     color: #303846;
     font-family: Arial, sans-serif !important;
 }
 
-/* Navigation buttons */
+div[data-testid="stAlert"] {
+    border-radius: 6px !important;
+}
+
+div[data-testid="stAlert"] p {
+    color: inherit !important;
+}
+
 .stButton > button {
     background-color: #FFFFFF !important;
     color: #203B5C !important;
@@ -91,7 +100,6 @@ p, label, li {
     border-color: #7895B5 !important;
 }
 
-/* Selected navigation button */
 .stButton > button[kind="primary"] {
     background-color: #203B5C !important;
     color: #FFFFFF !important;
@@ -103,7 +111,6 @@ p, label, li {
     color: #FFFFFF !important;
 }
 
-/* Download buttons */
 .stDownloadButton > button {
     background-color: #FFFFFF !important;
     color: #203B5C !important;
@@ -111,7 +118,6 @@ p, label, li {
     border-radius: 6px !important;
 }
 
-/* Input fields */
 .stTextInput input,
 .stNumberInput input,
 .stTextArea textarea {
@@ -121,13 +127,11 @@ p, label, li {
     border-radius: 5px !important;
 }
 
-/* Select boxes */
 .stSelectbox div[data-baseweb="select"] > div {
     background-color: #FFFFFF !important;
     color: #303846 !important;
 }
 
-/* Metrics */
 div[data-testid="stMetric"] {
     background-color: #FFFFFF !important;
     border: 1px solid #E1E6ED !important;
@@ -144,19 +148,16 @@ div[data-testid="stMetricValue"] {
     font-weight: 600 !important;
 }
 
-/* Dataframes */
 div[data-testid="stDataFrame"] {
     border: 1px solid #E1E6ED;
     border-radius: 6px;
 }
 
-/* Tabs */
 .stTabs [data-baseweb="tab"] {
     color: #203B5C !important;
     font-weight: 600 !important;
 }
 
-/* Expander */
 details {
     background-color: #FFFFFF !important;
     border: 1px solid #E1E6ED !important;
@@ -167,17 +168,95 @@ details summary {
     color: #203B5C !important;
 }
 
-/* Captions */
 .stCaption,
 div[data-testid="stCaptionContainer"] {
     color: #526174 !important;
 }
 
-/* Responsive */
+/* Sidebar styling */
+section[data-testid="stSidebar"] {
+    background-color: #FFFFFF;
+    border-right: 1px solid #E1E6ED;
+}
+
+section[data-testid="stSidebar"] .block-container {
+    padding-top: 1.5rem;
+}
+
+section[data-testid="stSidebar"] .stButton > button {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+/* Mobile responsive styling */
 @media (max-width: 768px) {
     .block-container {
-        padding: 1rem;
+        padding: 1rem 0.8rem;
     }
+
+    h1 {
+        font-size: 1.7rem !important;
+    }
+
+    h2 {
+        font-size: 1.4rem !important;
+    }
+
+    h3 {
+        font-size: 1.15rem !important;
+    }
+
+    div[data-testid="stMetric"] {
+        padding: 10px;
+    }
+
+    .stButton > button {
+        min-height: 42px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .block-container {
+        padding: 0.7rem 0.5rem;
+    }
+
+    div[data-testid="stMetric"] {
+        padding: 8px;
+    }
+}
+
+header[data-testid="stHeader"] {
+    height: 2rem !important;
+    min-height: 2rem !important;
+    background-color: #F7F8FA;
+    border-bottom: none;
+}
+
+/* Sidebar Toggle Arrow - Pure Black */
+header button[data-testid="stSidebarCollapsedControl"],
+header button[data-testid="stSidebarCollapseButton"],
+header [data-testid="stSidebarCollapsedControl"] button,
+header [data-testid="stSidebarCollapseButton"] button {
+    color: #000000 !important;
+    opacity: 1 !important;
+}
+
+header button[data-testid="stSidebarCollapsedControl"] svg,
+header button[data-testid="stSidebarCollapseButton"] svg,
+header [data-testid="stSidebarCollapsedControl"] svg,
+header [data-testid="stSidebarCollapseButton"] svg {
+    color: #000000 !important;
+    stroke: #000000 !important;
+    fill: #000000 !important;
+}
+
+header button[data-testid="stSidebarCollapsedControl"] svg path,
+header button[data-testid="stSidebarCollapseButton"] svg path {
+    stroke: #000000 !important;
+    stroke-width: 2.5px !important;
 }
 
 </style>
@@ -209,15 +288,10 @@ def load_data():
 
     data = data[columns].copy()
 
-    data["Student_ID"] = (
-        data["Student_ID"].astype(str).str.strip()
-    )
-
+    data["Student_ID"] = data["Student_ID"].astype(str).str.strip()
     data["Name"] = data["Name"].astype(str).str.strip()
 
-    for column in [
-        "Math", "Science", "English", "Attendance"
-    ]:
+    for column in ["Math", "Science", "English", "Attendance"]:
         data[column] = pd.to_numeric(
             data[column], errors="coerce"
         ).fillna(0)
@@ -227,10 +301,7 @@ def load_data():
 
 def save_data(data):
 
-    if (
-        not os.path.exists(BACKUP_PATH)
-        and os.path.exists(DATA_PATH)
-    ):
+    if not os.path.exists(BACKUP_PATH) and os.path.exists(DATA_PATH):
         shutil.copy2(DATA_PATH, BACKUP_PATH)
 
     data.to_csv(DATA_PATH, index=False)
@@ -245,7 +316,6 @@ df = load_data()
 # =====================================================
 
 def show_title(title, description=None):
-
     st.title(title)
 
     if description:
@@ -255,7 +325,6 @@ def show_title(title, description=None):
 
 
 def show_info(message):
-
     st.markdown(
         f"""
         <div style="
@@ -276,7 +345,6 @@ def show_info(message):
 
 
 def calculate_average(row):
-
     return (
         float(row["Math"])
         + float(row["Science"])
@@ -285,7 +353,6 @@ def calculate_average(row):
 
 
 def student_result(row):
-
     if (
         row["Math"] >= 40
         and row["Science"] >= 40
@@ -298,7 +365,6 @@ def student_result(row):
 
 
 def student_risk(row):
-
     average = calculate_average(row)
 
     if average < 40 or row["Attendance"] < 60:
@@ -311,10 +377,7 @@ def student_risk(row):
 
 
 def find_student(student_id):
-
-    result = df[
-        df["Student_ID"] == str(student_id)
-    ]
+    result = df[df["Student_ID"] == str(student_id)]
 
     if result.empty:
         return None
@@ -323,12 +386,9 @@ def find_student(student_id):
 
 
 def export_excel(data):
-
     output = BytesIO()
 
-    with pd.ExcelWriter(
-        output, engine="openpyxl"
-    ) as writer:
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
         data.to_excel(
             writer,
             index=False,
@@ -344,7 +404,6 @@ def export_excel(data):
 
 @st.cache_resource
 def load_model():
-
     if os.path.exists(MODEL_PATH):
         try:
             return joblib.load(MODEL_PATH)
@@ -358,49 +417,40 @@ model = load_model()
 
 
 # =====================================================
-# 6. TOP NAVIGATION
+# 6. LEFT SIDEBAR NAVIGATION
 # =====================================================
 
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
 
+with st.sidebar:
 
-st.markdown("## Student Analytics Pro")
+    st.markdown("## Student Analytics Pro")
 
-st.caption(
-    "Academic Performance Monitoring and Prediction System"
-)
+    st.caption("Academic Performance Monitoring System")
 
-st.markdown("**Explore Student Analytics Pro**")
+    st.divider()
 
-# First row
-for row_number in range(2):
+    st.markdown("**MAIN MENU**")
 
-    start = row_number * 5
-    row_pages = PAGES[start:start + 5]
+    for page_name in PAGES:
 
-    columns = st.columns(5)
+        if st.button(
+            page_name,
+            key="sidebar_" + page_name,
+            use_container_width=True,
+            type=(
+                "primary"
+                if st.session_state.current_page == page_name
+                else "secondary"
+            )
+        ):
+            st.session_state.current_page = page_name
+            st.rerun()
 
-    for column, page_name in zip(columns, row_pages):
+    st.divider()
 
-        with column:
-
-            if st.button(
-                page_name,
-                key="nav_" + page_name,
-                use_container_width=True,
-                type=(
-                    "primary"
-                    if st.session_state.current_page == page_name
-                    else "secondary"
-                )
-            ):
-
-                st.session_state.current_page = page_name
-                st.rerun()
-
-
-st.divider()
+    st.caption("Student Academic Analytics System")
 
 page = st.session_state.current_page
 
@@ -411,16 +461,25 @@ page = st.session_state.current_page
 
 if page == "Home":
 
-    st.title("Welcome to Student Analytics Pro")
+    intro_col, image_col = st.columns([1.15, 1], gap="large")
 
-    st.write(
-        "An academic analytics platform designed to understand "
-        "student performance, monitor attendance and support "
-        "better academic decisions."
-    )
+    with intro_col:
+        st.title("Welcome to Student Analytics Pro")
+
+        st.write(
+            "An academic analytics platform designed to understand "
+            "student performance, monitor attendance and support "
+            "better academic decisions."
+        )
+
+    with image_col:
+        st.image(
+            HOME_BANNER_URL,
+            caption=" ",
+            use_container_width=True
+        )
 
     st.divider()
-
     st.subheader("Platform Overview")
 
     total_students = len(df)
@@ -435,17 +494,19 @@ if page == "Home":
         if total_students > 0 else 0
     )
 
-    c1, c2, c3 = st.columns(3)
+    at_risk_students = sum(
+        student_risk(row) in ["High Risk", "Medium Risk"]
+        for _, row in df.iterrows()
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
 
     c1.metric("Total Students", total_students)
     c2.metric("Average Marks", f"{average_marks:.2f}")
-    c3.metric(
-        "Average Attendance",
-        f"{average_attendance:.2f}%"
-    )
+    c3.metric("Average Attendance", f"{average_attendance:.2f}%")
+    c4.metric("At-Risk Students", at_risk_students)
 
     st.divider()
-
     st.subheader("Explore the Platform")
 
     home_pages = [
@@ -461,30 +522,17 @@ if page == "Home":
 
         columns = st.columns(3)
 
-        for column, item in zip(
-            columns, home_pages[start:start + 3]
-        ):
+        for column, item in zip(columns, home_pages[start:start + 3]):
 
             with column:
-
                 with st.container(border=True):
-
                     st.subheader(item[0])
                     st.write(item[1])
-
-                    if st.button(
-                        "Open " + item[0],
-                        key="home_" + item[0],
-                        use_container_width=True
-                    ):
-
-                        st.session_state.current_page = item[0]
-                        st.rerun()
 
     st.divider()
 
     show_info(
-        "Use the navigation buttons above to explore "
+        "Select any module from the left sidebar to explore "
         "different sections of the application."
     )
 
@@ -501,7 +549,6 @@ elif page == "Dashboard":
     )
 
     if df.empty:
-
         show_info("No student records are available.")
 
     else:
@@ -535,9 +582,7 @@ elif page == "Dashboard":
         total = len(filtered_df)
 
         average = (
-            filtered_df[
-                ["Math", "Science", "English"]
-            ].mean().mean()
+            filtered_df[["Math", "Science", "English"]].mean().mean()
             if total else 0
         )
 
@@ -559,7 +604,6 @@ elif page == "Dashboard":
         c4.metric("Students Passing", passed)
 
         st.divider()
-
         st.subheader("Student Records")
 
         display_df = filtered_df.copy()
@@ -572,18 +616,17 @@ elif page == "Dashboard":
             student_result, axis=1
         )
 
-        st.dataframe(
-            display_df,
-            use_container_width=True
-        )
+        st.dataframe(display_df, use_container_width=True)
 
         st.divider()
 
-        chart1, chart2 = st.columns(2)
+        chart1, chart2 = st.columns(2, gap="large")
 
         with chart1:
 
             st.subheader("Subject-wise Average Marks")
+
+            fig, ax = plt.subplots(figsize=(6, 4))
 
             if subject_filter == "All Subjects":
 
@@ -591,43 +634,85 @@ elif page == "Dashboard":
                     ["Math", "Science", "English"]
                 ].mean()
 
-                fig, ax = plt.subplots()
-                averages.plot(kind="bar", ax=ax)
+                averages.plot(
+                    kind="bar",
+                    ax=ax,
+                    color="#2878B5"
+                )
+
                 ax.set_ylabel("Average Marks")
                 ax.set_ylim(0, 100)
-                st.pyplot(fig)
-                plt.close(fig)
+                ax.set_xlabel("Subject")
+                ax.tick_params(axis="x", rotation=0)
 
             else:
 
-                fig, ax = plt.subplots()
-
                 ax.hist(
                     filtered_df[subject_filter],
-                    bins=10
+                    bins=10,
+                    color="#2878B5",
+                    edgecolor="black"
                 )
 
                 ax.set_xlabel("Marks")
                 ax.set_ylabel("Number of Students")
+                ax.set_title(f"{subject_filter} Marks Distribution")
 
-                st.pyplot(fig)
-                plt.close(fig)
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
+            plt.close(fig)
 
         with chart2:
 
-            st.subheader("Attendance Distribution")
+            st.subheader("Student-wise Attendance")
 
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=(6, 4))
 
-            ax.hist(
-                filtered_df["Attendance"],
-                bins=10
-            )
+            if not filtered_df.empty:
 
-            ax.set_xlabel("Attendance Percentage")
-            ax.set_ylabel("Number of Students")
+                attendance_data = filtered_df.sort_values("Student_ID")
 
-            st.pyplot(fig)
+                bars = ax.bar(
+                    attendance_data["Student_ID"].astype(str),
+                    attendance_data["Attendance"],
+                    color="#2878B5",
+                    edgecolor="black",
+                    width=0.65
+                )
+
+                ax.set_ylim(0, 110)
+                ax.set_xlabel("Student ID")
+                ax.set_ylabel("Attendance (%)")
+
+                ax.set_title(
+                    f"Attendance of {len(attendance_data)} Students"
+                )
+
+                ax.tick_params(axis="x", rotation=45)
+
+                for bar in bars:
+                    height = bar.get_height()
+                    ax.text(
+                        bar.get_x() + bar.get_width() / 2,
+                        height + 1,
+                        f"{height:.0f}%",
+                        ha="center",
+                        va="bottom",
+                        fontsize=8
+                    )
+
+            else:
+                ax.text(
+                    0.5, 0.5,
+                    "No students in this filter",
+                    ha="center",
+                    va="center",
+                    transform=ax.transAxes
+                )
+                ax.set_axis_off()
+
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
             plt.close(fig)
 
         st.download_button(
@@ -650,7 +735,6 @@ elif page == "Student Search":
     )
 
     if df.empty:
-
         show_info("No student records are available.")
 
     else:
@@ -666,7 +750,6 @@ elif page == "Student Search":
         if search_text.strip():
 
             if search_type == "Student ID":
-
                 result = df[
                     df["Student_ID"].str.contains(
                         search_text.strip(),
@@ -676,7 +759,6 @@ elif page == "Student Search":
                 ]
 
             else:
-
                 result = df[
                     df["Name"].str.contains(
                         search_text.strip(),
@@ -686,7 +768,6 @@ elif page == "Student Search":
                 ]
 
             if result.empty:
-
                 show_info("No matching student found.")
 
             else:
@@ -695,10 +776,7 @@ elif page == "Student Search":
                     f"{len(result)} student record(s) found."
                 )
 
-                st.dataframe(
-                    result,
-                    use_container_width=True
-                )
+                st.dataframe(result, use_container_width=True)
 
                 selected_id = st.selectbox(
                     "Select Student",
@@ -706,7 +784,6 @@ elif page == "Student Search":
                 )
 
                 if st.button("View Student Report"):
-
                     st.session_state.report_student_id = selected_id
                     st.session_state.current_page = "Individual Report"
                     st.rerun()
@@ -724,7 +801,6 @@ elif page == "Individual Report":
     )
 
     if df.empty:
-
         show_info("No student records are available.")
 
     else:
@@ -752,20 +828,15 @@ elif page == "Individual Report":
             average = calculate_average(student)
 
             st.divider()
-
             st.subheader(student["Name"])
 
             c1, c2, c3 = st.columns(3)
 
             c1.metric("Student ID", student["Student_ID"])
             c2.metric("Average Marks", f"{average:.2f}")
-            c3.metric(
-                "Attendance",
-                f"{student['Attendance']:.2f}%"
-            )
+            c3.metric("Attendance", f"{student['Attendance']:.2f}%")
 
             st.divider()
-
             st.subheader("Subject Performance")
 
             marks_df = pd.DataFrame({
@@ -777,22 +848,21 @@ elif page == "Individual Report":
                 ]
             })
 
-            st.dataframe(
-                marks_df,
-                use_container_width=True
-            )
+            st.dataframe(marks_df, use_container_width=True)
 
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=(6, 4))
 
             ax.bar(
                 marks_df["Subject"],
-                marks_df["Marks"]
+                marks_df["Marks"],
+                color="#2878B5"
             )
 
             ax.set_ylim(0, 100)
             ax.set_ylabel("Marks")
 
-            st.pyplot(fig)
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
             plt.close(fig)
 
             st.subheader("Academic Summary")
@@ -839,8 +909,11 @@ elif page == "Attendance Analysis":
 
         average_attendance = df["Attendance"].mean()
 
-        below_75 = df[df["Attendance"] < 75]
-        above_75 = df[df["Attendance"] >= 75]
+        st.write("Total Students:", len(df))
+        st.write("Attendance Records:", df["Attendance"].count())
+
+        below_75 = df[df["Attendance"] < 75].copy()
+        above_75 = df[df["Attendance"] >= 75].copy()
 
         c1, c2, c3 = st.columns(3)
 
@@ -853,19 +926,47 @@ elif page == "Attendance Analysis":
         c3.metric("75% and Above", len(above_75))
 
         st.divider()
+        st.subheader("Student-wise Attendance")
 
-        st.subheader("Attendance Distribution")
+        attendance_data = df.sort_values("Student_ID")
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(9, 4.5))
 
-        ax.hist(df["Attendance"], bins=10)
+        bars = ax.bar(
+            attendance_data["Student_ID"].astype(str),
+            attendance_data["Attendance"],
+            color="#2878B5",
+            edgecolor="black",
+            width=0.65
+        )
 
-        ax.set_xlabel("Attendance Percentage")
-        ax.set_ylabel("Number of Students")
+        ax.set_ylim(0, 110)
+        ax.set_xlabel("Student ID")
+        ax.set_ylabel("Attendance (%)")
 
-        st.pyplot(fig)
+        ax.set_title(
+            f"Attendance of {len(attendance_data)} Students"
+        )
+
+        ax.tick_params(axis="x", rotation=45)
+
+        for bar in bars:
+            height = bar.get_height()
+
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                height + 1,
+                f"{height:.0f}%",
+                ha="center",
+                va="bottom",
+                fontsize=9
+            )
+
+        fig.tight_layout()
+        st.pyplot(fig, use_container_width=True)
         plt.close(fig)
 
+        st.divider()
         st.subheader("Students with Low Attendance")
 
         if below_75.empty:
@@ -918,20 +1019,25 @@ elif page == "Performance Analysis":
 
         st.divider()
 
-        chart1, chart2 = st.columns(2)
+        chart1, chart2 = st.columns(2, gap="large")
 
         with chart1:
 
             st.subheader("Subject-wise Performance")
 
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=(6, 4))
 
-            averages.plot(kind="bar", ax=ax)
+            averages.plot(
+                kind="bar",
+                ax=ax,
+                color="#2878B5"
+            )
 
             ax.set_ylabel("Average Marks")
             ax.set_ylim(0, 100)
 
-            st.pyplot(fig)
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
             plt.close(fig)
 
         with chart2:
@@ -944,18 +1050,23 @@ elif page == "Performance Analysis":
                 average_data.apply(calculate_average, axis=1)
             )
 
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=(6, 4))
 
-            ax.hist(average_data["Average"], bins=10)
+            ax.hist(
+                average_data["Average"],
+                bins=10,
+                color="#2878B5",
+                edgecolor="black"
+            )
 
             ax.set_xlabel("Average Marks")
             ax.set_ylabel("Number of Students")
 
-            st.pyplot(fig)
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
             plt.close(fig)
 
         st.divider()
-
         st.subheader("Top Performing Students")
 
         top_students = df.copy()
@@ -969,10 +1080,7 @@ elif page == "Performance Analysis":
             ascending=False
         ).head(5)
 
-        st.dataframe(
-            top_students,
-            use_container_width=True
-        )
+        st.dataframe(top_students, use_container_width=True)
 
 
 # =====================================================
@@ -1089,14 +1197,9 @@ elif page == "ML Prediction":
                 st.divider()
                 st.subheader("Prediction Result")
 
-                if str(prediction).lower() in [
-                    "pass", "1", "true"
-                ]:
-
+                if str(prediction).lower() in ["pass", "1", "true"]:
                     st.success("Predicted Result: Pass")
-
                 else:
-
                     st.warning("Predicted Result: Fail")
 
                 if hasattr(model, "predict_proba"):
@@ -1122,7 +1225,6 @@ elif page == "ML Prediction":
         if hasattr(model, "feature_importances_"):
 
             st.divider()
-
             st.subheader("Model Feature Importance")
 
             feature_names = [
@@ -1144,17 +1246,19 @@ elif page == "ML Prediction":
                 ascending=False
             )
 
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=(7, 4))
 
             ax.barh(
                 importance_df["Feature"],
-                importance_df["Importance"]
+                importance_df["Importance"],
+                color="#2878B5"
             )
 
             ax.set_xlabel("Importance")
             ax.invert_yaxis()
 
-            st.pyplot(fig)
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
             plt.close(fig)
 
 
@@ -1204,30 +1308,29 @@ elif page == "Student Risk Alerts":
         c3.metric("Low Risk", len(low_risk))
 
         st.divider()
-
         st.subheader("Risk Distribution")
 
         risk_counts = risk_df["Risk Category"].value_counts()
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(6, 4))
 
-        risk_counts.plot(kind="bar", ax=ax)
+        risk_counts.plot(
+            kind="bar",
+            ax=ax,
+            color="#2878B5"
+        )
 
         ax.set_ylabel("Number of Students")
 
-        st.pyplot(fig)
+        fig.tight_layout()
+        st.pyplot(fig, use_container_width=True)
         plt.close(fig)
 
         st.subheader("Student Risk Details")
 
         selected_risk = st.selectbox(
             "Filter by Risk Category",
-            [
-                "All",
-                "High Risk",
-                "Medium Risk",
-                "Low Risk"
-            ]
+            ["All", "High Risk", "Medium Risk", "Low Risk"]
         )
 
         if selected_risk != "All":
@@ -1240,10 +1343,7 @@ elif page == "Student Risk Alerts":
 
             display_risk = risk_df
 
-        st.dataframe(
-            display_risk,
-            use_container_width=True
-        )
+        st.dataframe(display_risk, use_container_width=True)
 
         st.subheader("Suggested Academic Support")
 
@@ -1284,8 +1384,6 @@ elif page == "Student Management":
         "Edit Student",
         "Delete Student"
     ])
-
-    # ADD STUDENT
 
     with tab1:
 
@@ -1342,9 +1440,7 @@ elif page == "Student Management":
 
             if not student_id or not student_name:
 
-                st.error(
-                    "Please enter Student ID and Student Name."
-                )
+                st.error("Please enter Student ID and Student Name.")
 
             elif student_id in df["Student_ID"].values:
 
@@ -1370,8 +1466,6 @@ elif page == "Student Management":
 
                 st.success("Student added successfully.")
                 st.rerun()
-
-    # EDIT STUDENT
 
     with tab2:
 
@@ -1471,8 +1565,6 @@ elif page == "Student Management":
 
                         st.rerun()
 
-    # DELETE STUDENT
-
     with tab3:
 
         st.subheader("Delete Student Record")
@@ -1493,15 +1585,8 @@ elif page == "Student Management":
 
             if delete_student is not None:
 
-                st.write(
-                    "**Student Name:**",
-                    delete_student["Name"]
-                )
-
-                st.write(
-                    "**Student ID:**",
-                    delete_student["Student_ID"]
-                )
+                st.write("**Student Name:**", delete_student["Name"])
+                st.write("**Student ID:**", delete_student["Student_ID"])
 
                 confirm_delete = st.checkbox(
                     "I confirm that I want to delete this student record."
@@ -1515,9 +1600,7 @@ elif page == "Student Management":
 
                     if not confirm_delete:
 
-                        st.error(
-                            "Please confirm before deleting."
-                        )
+                        st.error("Please confirm before deleting.")
 
                     else:
 
@@ -1534,13 +1617,9 @@ elif page == "Student Management":
                         st.rerun()
 
     st.divider()
-
     st.subheader("Current Student Records")
 
-    st.dataframe(
-        df,
-        use_container_width=True
-    )
+    st.dataframe(df, use_container_width=True)
 
     st.caption(
         "Changes are saved to dataset.csv on the machine running "
@@ -1568,7 +1647,6 @@ elif page == "About Project":
     )
 
     st.divider()
-
     st.subheader("Project Objectives")
 
     objectives = [
@@ -1584,7 +1662,6 @@ elif page == "About Project":
         st.write("- " + objective)
 
     st.divider()
-
     st.subheader("Technology Stack")
 
     technologies = pd.DataFrame({
@@ -1606,13 +1683,9 @@ elif page == "About Project":
         ]
     })
 
-    st.dataframe(
-        technologies,
-        use_container_width=True
-    )
+    st.dataframe(technologies, use_container_width=True)
 
     st.divider()
-
     st.subheader("Machine Learning Model")
 
     st.write(
@@ -1631,7 +1704,6 @@ elif page == "About Project":
     )
 
     st.divider()
-
     st.subheader("Application Modules")
 
     for module in PAGES:
